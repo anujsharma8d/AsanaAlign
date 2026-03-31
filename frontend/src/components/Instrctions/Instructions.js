@@ -8,7 +8,7 @@ import './Instructions.css'
 
 export default function Instructions({ currentPose }) {
 
-    const [instructions, setInsntructions] = useState(poseInstructions)
+    const [instructions] = useState(poseInstructions)
 
     return (
         <div className="instructions-container">
@@ -23,6 +23,7 @@ export default function Instructions({ currentPose }) {
             <img 
                 className="pose-demo-img"
                 src={poseImages[currentPose]}
+                alt={`${currentPose} demonstration`}
             />
         </div>
     )

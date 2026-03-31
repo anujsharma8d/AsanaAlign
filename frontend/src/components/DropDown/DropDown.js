@@ -26,6 +26,7 @@ return (
                         <img 
                             src={poseImages[pose]}
                             className="dropdown-img"
+                            alt={`${pose} pose`}
                         />
                         
                     </div>
