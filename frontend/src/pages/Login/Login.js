@@ -179,7 +179,7 @@ export default function Login({ initialMode = 'login' }) {
                 <div className="login-header">
                     <Activity className="login-logo-icon" size={48} color="var(--accent-primary)" />
                     {mode === 'login'  && <><h2>Welcome Back</h2><p>Log in to continue your yoga journey.</p></>}
-                    {mode === 'signup' && <><h2>Create Account</h2><p>Join Yoga Intelligence today.</p></>}
+                    {mode === 'signup' && <><h2>Create Account</h2><p>Join AsanaAlign today.</p></>}
                     {mode === 'otp'    && <><h2>Verify Email</h2><p>Enter the code sent to <strong>{email}</strong></p></>}
                 </div>
 

@@ -1,5 +1,5 @@
 {
-  "name": "yoga-intelligence-api",
+  "name": "asana-align-api",
   "version": "1.0.0",
   "private": true,
   "main": "server.js",
@@ -11,7 +11,7 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2",
+    "express": "4.22.1",
     "mongodb": "^6.3.0",
     "nodemailer": "^6.9.4"
   },

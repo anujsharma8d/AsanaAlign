@@ -35,7 +35,7 @@ app.get('/api/profile',           use(require('./profile')));
 app.put('/api/profile',           use(require('./profile')));
 app.put('/api/profile/password',  use(require('./profile/password')));
 
-app.get('/', (_, res) => res.json({ message: 'Yoga Intelligence API', version: '3.0.0' }));
+app.get('/', (_, res) => res.json({ message: 'AsanaAlign API', version: '3.0.0' }));
 
 // ── Start ─────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;

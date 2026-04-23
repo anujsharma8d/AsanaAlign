@@ -52,8 +52,8 @@ module.exports = async (req, res) => {
       expiresAt
     });
 
-    const message = `Your Yoga Intelligence signup code is ${otpCode}. It expires in ${expiryMinutes} minutes.`;
-    await sendEmail(email, 'Yoga Intelligence OTP Verification', message);
+    const message = `Your AsanaAlign signup code is ${otpCode}. It expires in ${expiryMinutes} minutes.`;
+    await sendEmail(email, 'AsanaAlign OTP Verification', message);
 
     const response = { message: 'OTP sent successfully.' };
     if (DEV_MODE || !EMAIL_ENABLED) {

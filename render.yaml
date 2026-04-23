@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: yoga-intelligence-api
+    name: asana-align-api
     runtime: node
     rootDir: backend
     buildCommand: npm install
@@ -26,3 +26,13 @@ services:
         value: "false"
       - key: OTP_EXPIRY_MINUTES
         value: "10"
+
+  - type: web
+    name: asana-align-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false

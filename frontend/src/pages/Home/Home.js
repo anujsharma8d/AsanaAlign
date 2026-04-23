@@ -19,7 +19,7 @@ export default function Home() {
             <nav className='home-navbar glass-panel'>
                 <div className='logo-container'>
                     <Activity className="logo-icon" size={32} color="var(--accent-primary)" />
-                    <h1 className='home-logo'>YogaIntelligence</h1>
+                    <h1 className='home-logo'>AsanaAlign</h1>
                 </div>
                 <div className="nav-links">
                     <Link to="/progress" className="nav-link-btn">

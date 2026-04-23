@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
     const mongoHealthy = Boolean(db);
     return sendJson(res, {
       status: 'healthy',
-      api: 'Yoga Intelligence Auth',
+      api: 'AsanaAlign Auth',
       mongo: mongoHealthy
     });
   } catch (error) {
