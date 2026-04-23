@@ -1,0 +1,11 @@
+# Local environment files
+.env
+backend/.env
+frontend/.env
+api/node_modules/
+
+# Vercel local build artifacts
+.vercel
+
+node_modules/
+.env
