@@ -25,6 +25,24 @@
     font-family: var(--font-heading);
 }
 
+.reports-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 94, 0, 0.3);
+}
+
+.reports-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 94, 0, 0.4);
+}
+
 .progress-main {
     flex: 1;
     padding: 40px;
@@ -34,6 +52,255 @@
     display: flex;
     flex-direction: column;
     gap: 40px;
+}
+
+/* Combined Calendar and Streak Section */
+.calendar-streak-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.calendar-streak-card {
+    padding: 16px;
+    max-width: 280px;
+    width: 100%;
+}
+
+/* Compact Streak Header */
+.streak-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--glass-border);
+    margin-bottom: 12px;
+}
+
+.streak-compact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.streak-info-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.streak-number-compact {
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1;
+    background: linear-gradient(135deg, #ff5e00 0%, #ff9500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: var(--font-heading);
+}
+
+.streak-label-compact {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.streak-hint {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.longest-streak-compact {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 8px;
+    background: rgba(156, 39, 176, 0.1);
+    border-radius: 10px;
+    color: #9c27b0;
+    font-size: 0.65rem;
+    font-weight: 600;
+}
+
+/* Old styles - keep for backward compatibility but not used */
+.top-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.calendar-streak-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 380px;
+}
+
+.streak-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.streak-card {
+    padding: 24px;
+    width: 100%;
+}
+
+.streak-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.streak-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.flame-active {
+    color: #ff5e00;
+    filter: drop-shadow(0 0 20px rgba(255, 94, 0, 0.6));
+    animation: flameFlicker 2s ease-in-out infinite;
+}
+
+.flame-inactive {
+    color: #666;
+}
+
+@keyframes flameFlicker {
+    0%, 100% { 
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.05) translateY(-2px);
+        opacity: 0.9;
+    }
+}
+
+.streak-info {
+    text-align: center;
+}
+
+.streak-number {
+    font-size: 3rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, #ff5e00 0%, #ff9500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: var(--font-heading);
+}
+
+.streak-label {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 600;
+}
+
+.streak-message {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 4px 0 0 0;
+}
+
+.longest-streak {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(156, 39, 176, 0.1);
+    border-radius: 20px;
+    color: #9c27b0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+/* Progress Grid */
+.progress-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.progress-card {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.progress-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.progress-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.progress-icon {
+    flex-shrink: 0;
+}
+
+.daily-icon {
+    color: #00e676;
+}
+
+.weekly-icon {
+    color: #00bcd4;
+}
+
+.monthly-icon {
+    color: #ff5e00;
+}
+
+.progress-stats {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 16px;
+}
+
+.progress-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.progress-stat .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
+}
+
+.progress-stat .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.progress-divider {
+    width: 1px;
+    height: 40px;
+    background: var(--glass-border);
 }
 
 .stats-header {
@@ -161,6 +428,45 @@
 
 @media (max-width: 768px) {
     .stats-header {
+        grid-template-columns: 1fr;
+    }
+
+    .progress-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .progress-main {
+        padding: 20px;
+        gap: 24px;
+    }
+
+    .calendar-streak-card {
+        max-width: 100%;
+    }
+
+    .progress-stats {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .progress-divider {
+        width: 100%;
+        height: 1px;
+    }
+
+    .streak-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .longest-streak-compact {
+        align-self: flex-start;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .progress-grid {
         grid-template-columns: 1fr;
     }
 }

@@ -185,6 +185,28 @@ class API {
       throw error;
     }
   }
+
+  // ==================== Reports API ====================
+
+  // Get report (daily, weekly, or monthly)
+  async getReport(email, type = 'daily') {
+    try {
+      const response = await fetch(
+        `${this.baseURL}/api/reports?email=${encodeURIComponent(email)}&type=${type}`
+      );
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get report');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Get report error:', error);
+      throw error;
+    }
+  }
 }
 
 // Export singleton instance

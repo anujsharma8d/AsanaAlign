@@ -3,9 +3,11 @@
 :root {
   /* Colors - Premium Dark Theme with Vibrant Accents */
   --bg-dark: #0a0a0f;
+  --bg-main: #0a0a0f;
   --bg-card: rgba(25, 25, 35, 0.6);
   --text-primary: #ffffff;
   --text-secondary: #a0a0b0;
+  --text-muted: #707080;
   
   --accent-primary: #ff5e00;
   --accent-secondary: #ff9100;
@@ -114,4 +116,41 @@ a {
 
 .animate-fade-in {
   animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Gradient Text Utility */
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Back Link Utility */
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+  font-weight: 500;
+}
+
+.back-link:hover {
+  color: var(--accent-primary);
+}
+
+/* Loading and Error Messages */
+.loading-message, .error-message {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.1rem;
+}
+
+.error-message {
+  color: #ff5252;
+  background: rgba(255, 82, 82, 0.1);
+  border: 1px solid rgba(255, 82, 82, 0.3);
+  border-radius: 12px;
+  margin-bottom: 20px;
 }

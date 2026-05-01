@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Activity, BookOpen, BarChart2, LogOut, UserCircle } from 'lucide-react'
+import { Activity, BookOpen, BarChart2, LogOut, UserCircle, Trophy } from 'lucide-react'
 
 import './Home.css'
 
@@ -25,6 +25,10 @@ export default function Home() {
                     <Link to="/progress" className="nav-link-btn">
                         <BarChart2 size={20} />
                         <span>Progress</span>
+                    </Link>
+                    <Link to="/achievements" className="nav-link-btn achievements-btn">
+                        <Trophy size={20} />
+                        <span>Achievements</span>
                     </Link>
                     <Link to="/profile" className="nav-link-btn">
                         <UserCircle size={20} />

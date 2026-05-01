@@ -7,6 +7,8 @@ import Tutorials from './pages/Tutorials/Tutorials'
 import Login from './pages/Login/Login'
 import Progress from './pages/Progress/Progress'
 import Profile from './pages/Profile/Profile'
+import Reports from './pages/Reports/Reports'
+import AchievementsPage from './pages/Achievements/Achievements'
 
 import './App.css'
 
@@ -45,6 +47,16 @@ export default function App() {
         <Route path='/progress' element={
           <ProtectedRoute>
             <Progress />
+          </ProtectedRoute>
+        } />
+        <Route path='/reports' element={
+          <ProtectedRoute>
+            <Reports />
+          </ProtectedRoute>
+        } />
+        <Route path='/achievements' element={
+          <ProtectedRoute>
+            <AchievementsPage />
           </ProtectedRoute>
         } />
         <Route path='/profile' element={

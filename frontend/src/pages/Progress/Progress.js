@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Award, Clock, Activity, Target } from 'lucide-react';
+import { ArrowLeft, Award, Clock, Activity, Target, Flame, Calendar, TrendingUp } from 'lucide-react';
 import api from '../../utils/api';
+import ActivityCalendar from '../../components/ActivityCalendar/ActivityCalendar';
 import './Progress.css';
 
 export default function Progress() {
@@ -9,7 +10,13 @@ export default function Progress() {
         totalTime: 0,
         totalSessions: 0,
         favoritePose: 'None',
-        recentSessions: []
+        recentSessions: [],
+        daily: { sessions: 0, time: 0 },
+        weekly: { sessions: 0, time: 0, daysActive: 0 },
+        monthly: { sessions: 0, time: 0, daysActive: 0 },
+        streak: { current: 0, longest: 0 },
+        activityCalendar: [],
+        achievements: []
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -36,7 +43,13 @@ export default function Progress() {
                     totalTime: data.totalTime || 0,
                     totalSessions: data.totalSessions || 0,
                     favoritePose: data.favoritePose || 'None',
-                    recentSessions: data.recentSessions || []
+                    recentSessions: data.recentSessions || [],
+                    daily: data.daily || { sessions: 0, time: 0 },
+                    weekly: data.weekly || { sessions: 0, time: 0, daysActive: 0 },
+                    monthly: data.monthly || { sessions: 0, time: 0, daysActive: 0 },
+                    streak: data.streak || { current: 0, longest: 0 },
+                    activityCalendar: data.activityCalendar || [],
+                    achievements: data.achievements || []
                 });
             } catch (err) {
                 console.error('Failed to load progress from backend:', err);
@@ -65,7 +78,13 @@ export default function Progress() {
                         totalTime: Math.round(totalTime),
                         totalSessions: storedSessions.length,
                         favoritePose: favorite,
-                        recentSessions: storedSessions.reverse().slice(0, 10)
+                        recentSessions: storedSessions.reverse().slice(0, 10),
+                        daily: { sessions: 0, time: 0 },
+                        weekly: { sessions: 0, time: 0, daysActive: 0 },
+                        monthly: { sessions: 0, time: 0, daysActive: 0 },
+                        streak: { current: 0, longest: 0 },
+                        activityCalendar: [],
+                        achievements: []
                     });
                 }
             } finally {
@@ -77,9 +96,15 @@ export default function Progress() {
     }, [navigate]);
 
     const formatTime = (seconds) => {
-        if (seconds < 60) return `${seconds}s`;
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
+        // Round to nearest integer to avoid floating point issues
+        const roundedSeconds = Math.round(seconds);
+        
+        if (roundedSeconds < 60) return `${roundedSeconds}s`;
+        
+        const mins = Math.floor(roundedSeconds / 60);
+        const secs = roundedSeconds % 60;
+        
+        if (secs === 0) return `${mins}m`;
         return `${mins}m ${secs}s`;
     };
 
@@ -109,13 +134,112 @@ export default function Progress() {
                     <span>Back to Home</span>
                 </Link>
                 <h2>Your Progress</h2>
-                <div style={{width: 100}}></div> {/* Spacer for centering */}
+                <Link to="/reports" className="reports-link">
+                    <Target size={20} />
+                    <span>View Reports</span>
+                </Link>
             </nav>
 
             <main className="progress-main">
                 {error && <div className="error-message">{error}</div>}
                 
-                <div className="stats-header animate-fade-in">
+                {/* Combined Calendar and Streak Section */}
+                <div className="calendar-streak-section animate-fade-in">
+                    <div className="calendar-streak-card glass-panel">
+                        {/* Streak Header */}
+                        <div className="streak-header">
+                            <div className="streak-compact">
+                                <Flame size={24} className={stats.streak.current > 0 ? 'flame-active' : 'flame-inactive'} />
+                                <div className="streak-info-compact">
+                                    <span className="streak-number-compact">{stats.streak.current}</span>
+                                    <span className="streak-label-compact">Day Streak</span>
+                                    {stats.streak.current === 0 && (
+                                        <span className="streak-hint">5 min/day to streak</span>
+                                    )}
+                                </div>
+                            </div>
+                            {stats.streak.longest > 0 && (
+                                <div className="longest-streak-compact">
+                                    <Award size={12} />
+                                    <span>Best: {stats.streak.longest}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Calendar */}
+                        <ActivityCalendar activityData={stats.activityCalendar} />
+                    </div>
+                </div>
+
+                {/* Daily & Weekly & Monthly Progress */}
+                <div className="progress-grid animate-fade-in" style={{animationDelay: '0.1s'}}>
+                    <div className="progress-card glass-panel">
+                        <div className="progress-header">
+                            <Calendar size={24} className="progress-icon daily-icon" />
+                            <h3>Today's Progress</h3>
+                        </div>
+                        <div className="progress-stats">
+                            <div className="progress-stat">
+                                <span className="stat-value gradient-text">{stats.daily.sessions}</span>
+                                <span className="stat-label">Sessions</span>
+                            </div>
+                            <div className="progress-divider"></div>
+                            <div className="progress-stat">
+                                <span className="stat-value gradient-text">{formatTime(stats.daily.time)}</span>
+                                <span className="stat-label">Time</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="progress-card glass-panel">
+                        <div className="progress-header">
+                            <Activity size={24} className="progress-icon weekly-icon" />
+                            <h3>This Week</h3>
+                        </div>
+                        <div className="progress-stats">
+                            <div className="progress-stat">
+                                <span className="stat-value gradient-text">{stats.weekly.sessions}</span>
+                                <span className="stat-label">Sessions</span>
+                            </div>
+                            <div className="progress-divider"></div>
+                            <div className="progress-stat">
+                                <span className="stat-value gradient-text">{stats.weekly.daysActive}</span>
+                                <span className="stat-label">Days Active</span>
+                            </div>
+                            <div className="progress-divider"></div>
+                            <div className="progress-stat">
+                                <span className="stat-value gradient-text">{formatTime(stats.weekly.time)}</span>
+                                <span className="stat-label">Time</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="progress-card glass-panel">
+                        <div className="progress-header">
+                            <TrendingUp size={24} className="progress-icon monthly-icon" />
+                            <h3>This Month</h3>
+                        </div>
+                        <div className="progress-stats">
+                            <div className="progress-stat">
+                                <span className="stat-value gradient-text">{stats.monthly.sessions}</span>
+                                <span className="stat-label">Sessions</span>
+                            </div>
+                            <div className="progress-divider"></div>
+                            <div className="progress-stat">
+                                <span className="stat-value gradient-text">{stats.monthly.daysActive}</span>
+                                <span className="stat-label">Days Active</span>
+                            </div>
+                            <div className="progress-divider"></div>
+                            <div className="progress-stat">
+                                <span className="stat-value gradient-text">{formatTime(stats.monthly.time)}</span>
+                                <span className="stat-label">Time</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Overall Stats */}
+                <div className="stats-header animate-fade-in" style={{animationDelay: '0.2s'}}>
                     <div className="stat-card glass-panel">
                         <div className="stat-icon-wrapper time-icon">
                             <Clock size={28} />
@@ -147,7 +271,7 @@ export default function Progress() {
                     </div>
                 </div>
 
-                <div className="recent-activity glass-panel animate-fade-in" style={{animationDelay: '0.2s'}}>
+                <div className="recent-activity glass-panel animate-fade-in" style={{animationDelay: '0.3s'}}>
                     <div className="activity-header">
                         <Target size={24} className="activity-icon" />
                         <h3>Recent Sessions</h3>

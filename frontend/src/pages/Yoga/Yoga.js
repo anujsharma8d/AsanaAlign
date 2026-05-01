@@ -1,8 +1,8 @@
 import * as poseDetection from '@tensorflow-models/pose-detection';
 import * as tf from '@tensorflow/tfjs';
-import React, { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Webcam from 'react-webcam'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Play, Square, Timer, Trophy } from 'lucide-react'
 
 import { count } from '../../utils/music'; 
@@ -17,218 +17,230 @@ import './Yoga.css'
 
 let skeletonColor = 'rgb(255,255,255)'
 let poseList = [
-  'Tree', 'Chair', 'Cobra', 'Warrior', 'Dog',
-  'Shoulderstand', 'Traingle'
+  'Chair', 'Warrior', 'Cobra', 'Dog', 'Tree', 'Traingle', 'Shoulderstand'
 ]
 
-let interval
-
-// flag variable is used to help capture the time when AI just detect 
-// the pose as correct(probability more than threshold)
-let flag = false
+// Module-level vars (survive re-renders, safe inside setInterval closures)
+let interval        = null
+let flag            = false   // true while pose is correctly held
+let sessionSaved    = false   // prevents double-save on stop + exit
 
 function Yoga() {
-  const navigate = useNavigate()
-  const webcamRef = useRef(null)
-  const canvasRef = useRef(null)
+  const navigate    = useNavigate()
+  const webcamRef   = useRef(null)
+  const canvasRef   = useRef(null)
 
-  const [startingTime, setStartingTime] = useState(0)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [poseTime, setPoseTime] = useState(0)
+  // Refs for values that must be current inside interval callbacks
+  const startingTimeRef = useRef(0)
+  const poseTimerRef    = useRef(null)
+  const bestPerformRef  = useRef(0)
+
+  const [poseTime,    setPoseTime]    = useState(0)
   const [bestPerform, setBestPerform] = useState(0)
-  const [currentPose, setCurrentPose] = useState('Tree')
+  const [currentPose, setCurrentPose] = useState('Chair')
   const [isStartPose, setIsStartPose] = useState(false)
 
-  useEffect(() => {
-    const timeDiff = (currentTime - startingTime)/1000
-    if(flag) {
-      setPoseTime(Number(timeDiff.toFixed(1)))
-    }
-    if(timeDiff > bestPerform) {
-      setBestPerform(Number(timeDiff.toFixed(1)))
-    }
-  }, [currentTime, bestPerform, startingTime])
+  // ── Pose timer ──────────────────────────────────────────────────────────
+  const startPoseTimer = () => {
+    if (poseTimerRef.current) return   // already ticking
+    startingTimeRef.current = Date.now()
+    poseTimerRef.current = setInterval(() => {
+      const elapsed = Number(((Date.now() - startingTimeRef.current) / 1000).toFixed(1))
+      setPoseTime(elapsed)
+      if (elapsed > bestPerformRef.current) {
+        bestPerformRef.current = elapsed
+        setBestPerform(elapsed)
+      }
+    }, 100)
+  }
 
-  useEffect(() => {
-    setCurrentTime(0)
+  // Stop the interval but keep the last poseTime visible on screen
+  const stopPoseTimer = () => {
+    if (poseTimerRef.current) {
+      clearInterval(poseTimerRef.current)
+      poseTimerRef.current = null
+    }
+    // Do NOT reset poseTime — keep showing the last held value
+  }
+
+  // Full reset — only on pose change or new session start
+  const resetTimers = () => {
+    if (poseTimerRef.current) {
+      clearInterval(poseTimerRef.current)
+      poseTimerRef.current = null
+    }
     setPoseTime(0)
+  }
+
+  // Reset stats when pose changes
+  useEffect(() => {
+    resetTimers()
     setBestPerform(0)
+    bestPerformRef.current = 0
   }, [currentPose])
 
+  // ── TF helpers ──────────────────────────────────────────────────────────
   const CLASS_NO = {
-    Chair: 0,
-    Cobra: 1,
-    Dog: 2,
-    No_Pose: 3,
-    Shoulderstand: 4,
-    Traingle: 5,
-    Tree: 6,
-    Warrior: 7,
+    Chair: 0, Cobra: 1, Dog: 2, No_Pose: 3,
+    Shoulderstand: 4, Traingle: 5, Tree: 6, Warrior: 7,
   }
 
   function get_center_point(landmarks, left_bodypart, right_bodypart) {
-    let left = tf.gather(landmarks, left_bodypart, 1)
+    let left  = tf.gather(landmarks, left_bodypart,  1)
     let right = tf.gather(landmarks, right_bodypart, 1)
-    const center = tf.add(tf.mul(left, 0.5), tf.mul(right, 0.5))
-    return center
+    return tf.add(tf.mul(left, 0.5), tf.mul(right, 0.5))
   }
 
-  function get_pose_size(landmarks, torso_size_multiplier=2.5) {
-    let hips_center = get_center_point(landmarks, POINTS.LEFT_HIP, POINTS.RIGHT_HIP)
-    let shoulders_center = get_center_point(landmarks,POINTS.LEFT_SHOULDER, POINTS.RIGHT_SHOULDER)
-    let torso_size = tf.norm(tf.sub(shoulders_center, hips_center))
-    let pose_center_new = get_center_point(landmarks, POINTS.LEFT_HIP, POINTS.RIGHT_HIP)
-    pose_center_new = tf.expandDims(pose_center_new, 1)
-
-    pose_center_new = tf.broadcastTo(pose_center_new, [1, 17, 2])
-    let d = tf.gather(tf.sub(landmarks, pose_center_new), 0, 0)
-    let max_dist = tf.max(tf.norm(d,'euclidean', 0))
-
-    let pose_size = tf.maximum(tf.mul(torso_size, torso_size_multiplier), max_dist)
-    return pose_size
+  function get_pose_size(landmarks, torso_size_multiplier = 2.5) {
+    let hips_center      = get_center_point(landmarks, POINTS.LEFT_HIP,      POINTS.RIGHT_HIP)
+    let shoulders_center = get_center_point(landmarks, POINTS.LEFT_SHOULDER, POINTS.RIGHT_SHOULDER)
+    let torso_size       = tf.norm(tf.sub(shoulders_center, hips_center))
+    let pose_center_new  = tf.broadcastTo(tf.expandDims(get_center_point(landmarks, POINTS.LEFT_HIP, POINTS.RIGHT_HIP), 1), [1, 17, 2])
+    let d                = tf.gather(tf.sub(landmarks, pose_center_new), 0, 0)
+    let max_dist         = tf.max(tf.norm(d, 'euclidean', 0))
+    return tf.maximum(tf.mul(torso_size, torso_size_multiplier), max_dist)
   }
 
   function normalize_pose_landmarks(landmarks) {
-    let pose_center = get_center_point(landmarks, POINTS.LEFT_HIP, POINTS.RIGHT_HIP)
-    pose_center = tf.expandDims(pose_center, 1)
-    pose_center = tf.broadcastTo(pose_center, [1, 17, 2])
+    let pose_center = tf.broadcastTo(tf.expandDims(get_center_point(landmarks, POINTS.LEFT_HIP, POINTS.RIGHT_HIP), 1), [1, 17, 2])
     landmarks = tf.sub(landmarks, pose_center)
-
-    let pose_size = get_pose_size(landmarks)
-    landmarks = tf.div(landmarks, pose_size)
-    return landmarks
+    return tf.div(landmarks, get_pose_size(landmarks))
   }
 
   function landmarks_to_embedding(landmarks) {
-    landmarks = normalize_pose_landmarks(tf.expandDims(landmarks, 0))
-    let embedding = tf.reshape(landmarks, [1,34])
-    return embedding
+    return tf.reshape(normalize_pose_landmarks(tf.expandDims(landmarks, 0)), [1, 34])
   }
 
+  // ── Detection loop ──────────────────────────────────────────────────────
   const runMovenet = async () => {
-    const detectorConfig = {modelType: poseDetection.movenet.modelType.SINGLEPOSE_THUNDER};
-    const detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig);
-    const poseClassifier = await tf.loadLayersModel('https://models.s3.jp-tok.cloud-object-storage.appdomain.cloud/model.json')
+    const detector       = await poseDetection.createDetector(
+      poseDetection.SupportedModels.MoveNet,
+      { modelType: poseDetection.movenet.modelType.SINGLEPOSE_THUNDER }
+    )
+    const poseClassifier = await tf.loadLayersModel(
+      'https://models.s3.jp-tok.cloud-object-storage.appdomain.cloud/model.json'
+    )
     const countAudio = new Audio(count)
-    countAudio.loop = true
-    interval = setInterval(() => { 
-        detectPose(detector, poseClassifier, countAudio)
+    countAudio.loop  = true
+
+    interval = setInterval(() => {
+      detectPose(detector, poseClassifier, countAudio)
     }, 100)
   }
 
   const detectPose = async (detector, poseClassifier, countAudio) => {
-    if (
-      webcamRef.current &&
-      webcamRef.current.video.readyState === 4
-    ) {
-      let notDetected = 0 
-      const video = webcamRef.current.video
-      const pose = await detector.estimatePoses(video)
-      
-      if (!canvasRef.current) return;
-      const ctx = canvasRef.current.getContext('2d')
-      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-      
-      try {
-        const keypoints = pose[0].keypoints 
-        let input = keypoints.map((keypoint) => {
-          if(keypoint.score > 0.2) { // Lowered from 0.4
-            if(!(keypoint.name === 'left_eye' || keypoint.name === 'right_eye')) {
-              drawPoint(ctx, keypoint.x, keypoint.y, 6, skeletonColor)
-              let connections = keypointConnections[keypoint.name]
-              try {
-                connections.forEach((connection) => {
-                  let conName = connection.toUpperCase()
-                  drawSegment(ctx, [keypoint.x, keypoint.y],
-                      [keypoints[POINTS[conName]].x,
-                       keypoints[POINTS[conName]].y]
-                  , skeletonColor)
-                })
-              } catch(err) {}
-            }
-          } else {
-            notDetected += 1
-          } 
-          return [keypoint.x, keypoint.y]
-        }) 
+    if (!webcamRef.current || webcamRef.current.video.readyState !== 4) return
 
-        if(notDetected > 8) { // Increased from 4
-          skeletonColor = 'rgb(255,255,255)'
-          return
+    const video = webcamRef.current.video
+    const pose  = await detector.estimatePoses(video)
+
+    if (!canvasRef.current) return
+    const ctx = canvasRef.current.getContext('2d')
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+
+    try {
+      const keypoints = pose[0].keypoints
+      let notDetected = 0
+
+      let input = keypoints.map((keypoint) => {
+        if (keypoint.score > 0.5) {
+          if (keypoint.name !== 'left_eye' && keypoint.name !== 'right_eye') {
+            drawPoint(ctx, keypoint.x, keypoint.y, 6, skeletonColor)
+            const connections = keypointConnections[keypoint.name]
+            try {
+              connections.forEach((connection) => {
+                const conName = connection.toUpperCase()
+                drawSegment(ctx,
+                  [keypoint.x, keypoint.y],
+                  [keypoints[POINTS[conName]].x, keypoints[POINTS[conName]].y],
+                  skeletonColor
+                )
+              })
+            } catch (err) {}
+          }
+        } else {
+          notDetected++
         }
+        return [keypoint.x, keypoint.y]
+      })
 
-        const processedInput = landmarks_to_embedding(input)
-        const classification = poseClassifier.predict(processedInput)
-
-        classification.array().then((data) => {         
-          const classNo = CLASS_NO[currentPose]
-          const confidence = data[0][classNo]
-          
-          // Debug logging to help identify why detection might fail
-          if (confidence > 0.5) {
-            console.log(`Pose: ${currentPose}, Confidence: ${confidence.toFixed(4)}`);
-          }
-
-          if(confidence > 0.90) { // Lowered from 0.97
-            if(!flag) {
-              countAudio.play()
-              setStartingTime(Date.now())
-              flag = true
-            }
-            setCurrentTime(Date.now()) 
-            skeletonColor = 'rgb(0, 230, 118)' // var(--success)
-          } else {
-            flag = false
-            skeletonColor = 'rgb(255,255,255)'
-            countAudio.pause()
-            countAudio.currentTime = 0
-          }
-        })
-      } catch(err) {
-        console.log(err)
+      // Require at least 10 high-confidence keypoints — rejects empty/noisy frames
+      if (notDetected > 7) {
+        skeletonColor = 'rgb(255,255,255)'
+        if (flag) { stopPoseTimer(); flag = false }
+        return
       }
+
+      // Also require the core body keypoints (shoulders + hips) to be visible
+      const corePoints = [
+        POINTS.LEFT_SHOULDER, POINTS.RIGHT_SHOULDER,
+        POINTS.LEFT_HIP,      POINTS.RIGHT_HIP
+      ]
+      const coreVisible = corePoints.every(pt => keypoints[pt]?.score > 0.5)
+      if (!coreVisible) {
+        skeletonColor = 'rgb(255,255,255)'
+        if (flag) { stopPoseTimer(); flag = false }
+        return
+      }
+
+      const classification = poseClassifier.predict(landmarks_to_embedding(input))
+
+      classification.array().then((data) => {
+        const confidence = data[0][CLASS_NO[currentPose]]
+
+        if (confidence > 0.97) {
+          if (!flag) {
+            countAudio.play()
+            flag = true
+          }
+          startPoseTimer()                        // starts only if not already running
+          skeletonColor = 'rgb(0, 230, 118)'
+        } else {
+          if (flag) {
+            stopPoseTimer()                       // stop and reset pose time
+            flag = false
+          }
+          skeletonColor = 'rgb(255,255,255)'
+          countAudio.pause()
+          countAudio.currentTime = 0
+        }
+      })
+    } catch (err) {
+      console.log(err)
     }
   }
 
-  function startYoga(){
-    setIsStartPose(true) 
+  // ── Session controls ────────────────────────────────────────────────────
+  function startYoga() {
+    sessionSaved = false
+    flag         = false
+    bestPerformRef.current = 0
+    setBestPerform(0)
+    setPoseTime(0)
+    resetTimers()
+    setIsStartPose(true)
     runMovenet()
-  } 
+  }
 
   const stopPose = async () => {
-    setIsStartPose(false)
+    if (sessionSaved) return
+    sessionSaved = true
+
     clearInterval(interval)
-    
-    // Save session data
-    const userData = JSON.parse(localStorage.getItem('yoga_user'));
-    if (userData && userData.email && bestPerform > 0) {
-      const sessionData = {
-        email: userData.email,
-        pose: currentPose,
-        duration: Number(bestPerform),
-        accuracy: 95,
-        createdAt: new Date().toISOString()
-      };
-
-      // 1. Save to backend
-      try {
-        await api.saveSession(
-          sessionData.email,
-          sessionData.pose,
-          sessionData.duration,
-          sessionData.accuracy
-        );
-        console.log('Session saved to backend');
-      } catch (error) {
-        console.error('Error saving session to backend:', error);
-      }
-
-      // 2. Save to localStorage (Backup & for immediate Progress view)
-      const localSessions = JSON.parse(localStorage.getItem('yoga_sessions') || '[]');
-      localSessions.push(sessionData);
-      localStorage.setItem('yoga_sessions', JSON.stringify(localSessions));
-    }
+    interval = null
+    resetTimers()
     flag = false
+    setIsStartPose(false)
+
+    const userData = JSON.parse(localStorage.getItem('yoga_user'))
+    if (userData?.email && bestPerformRef.current > 0) {
+      try {
+        await api.saveSession(userData.email, currentPose, Math.round(bestPerformRef.current), 95)
+        console.log('Session saved')
+      } catch (err) {
+        console.error('Error saving session:', err)
+      }
+    }
   }
 
   const handleExit = async () => {
@@ -236,6 +248,7 @@ function Yoga() {
     navigate('/')
   }
 
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="yoga-page animate-fade-in">
       <nav className="yoga-nav glass-panel">
@@ -245,12 +258,12 @@ function Yoga() {
         </div>
         <div className="nav-logo">AsanaAlign</div>
         <div className="nav-actions">
-           {isStartPose && (
-             <div className="session-indicator">
-               <span className="dot pulse"></span>
-               Live Detection
-             </div>
-           )}
+          {isStartPose && (
+            <div className="session-indicator">
+              <span className="dot pulse"></span>
+              Live Detection
+            </div>
+          )}
         </div>
       </nav>
 
@@ -270,38 +283,29 @@ function Yoga() {
               </button>
             </div>
             <div className="setup-preview glass-panel">
-               <div className="preview-label">Preview Pose</div>
-               <div className="preview-visual">
-                  <img src={poseImages[currentPose]} alt={currentPose} className="setup-pose-img" />
-               </div>
-               <div className="preview-info">
-                  <h2>{currentPose} Pose</h2>
-                  <p>Position yourself so your full body is visible in the camera.</p>
-               </div>
+              <div className="preview-label">Preview Pose</div>
+              <div className="preview-visual">
+                <img src={poseImages[currentPose]} alt={currentPose} className="setup-pose-img" />
+              </div>
+              <div className="preview-info">
+                <h2>{currentPose} Pose</h2>
+                <p>Position yourself so your full body is visible in the camera.</p>
+              </div>
             </div>
           </div>
         ) : (
           <div className="yoga-workspace">
             <div className="workspace-main">
               <div className="camera-container glass-panel">
-                <Webcam
-                  ref={webcamRef}
-                  className="webcam-video"
-                  audio={false}
-                />
-                <canvas
-                  ref={canvasRef}
-                  className="webcam-canvas"
-                  width="640"
-                  height="480"
-                />
+                <Webcam ref={webcamRef} className="webcam-video" audio={false} />
+                <canvas ref={canvasRef} className="webcam-canvas" width="640" height="480" />
               </div>
               <button onClick={stopPose} className="btn-primary btn-stop workspace-stop-btn">
                 <Square size={20} fill="currentColor" />
                 Stop Session
               </button>
             </div>
-            
+
             <div className="workspace-sidebar">
               <div className="dashboard-card glass-panel">
                 <h3>Session Stats</h3>
@@ -309,7 +313,7 @@ function Yoga() {
                   <div className="stat-box">
                     <Timer size={24} color="var(--accent-primary)" />
                     <span className="stat-label">Pose Time</span>
-                    <span className={`stat-value ${flag ? 'highlight' : ''}`}>{poseTime}s</span>
+                    <span className={`stat-value ${poseTime > 0 ? 'highlight' : ''}`}>{poseTime}s</span>
                   </div>
                   <div className="stat-box">
                     <Trophy size={24} color="#ffd700" />
@@ -320,18 +324,18 @@ function Yoga() {
               </div>
 
               <div className="mini-instructions glass-panel">
-                 <h4>Current Pose</h4>
-                 <div className="mini-pose-info">
-                    <img src={poseImages[currentPose]} alt={currentPose} />
-                    <span>{currentPose}</span>
-                 </div>
-                 <div className="mini-pose-details">
-                    <ul>
-                      {poseInstructions[currentPose].map((step, i) => (
-                        <li key={i}>{step}</li>
-                      ))}
-                    </ul>
-                 </div>
+                <h4>Current Pose</h4>
+                <div className="mini-pose-info">
+                  <img src={poseImages[currentPose]} alt={currentPose} />
+                  <span>{currentPose}</span>
+                </div>
+                <div className="mini-pose-details">
+                  <ul>
+                    {poseInstructions[currentPose].map((step, i) => (
+                      <li key={i}>{step}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

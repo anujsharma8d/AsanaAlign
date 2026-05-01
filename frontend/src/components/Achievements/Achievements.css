@@ -1,0 +1,262 @@
+.achievements-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.achievements-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 24px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    backdrop-filter: var(--glass-blur);
+}
+
+.achievements-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+.achievements-trophy {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.achievements-title h3 {
+    margin: 0 0 2px 0;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+}
+
+.achievements-sub {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.achievements-overall-bar {
+    flex: 1;
+    max-width: 260px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.achievements-overall-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
+
+/* ── Category Filters ───────────────────────────────────────────────────── */
+.achievements-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ach-filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-body);
+}
+
+.ach-filter-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+
+.ach-filter-btn.active {
+    background: linear-gradient(135deg, rgba(255, 94, 0, 0.2), rgba(255, 145, 0, 0.2));
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+/* ── Grid ───────────────────────────────────────────────────────────────── */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+/* ── Card ───────────────────────────────────────────────────────────────── */
+.ach-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid var(--glass-border);
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ach-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    border-radius: 14px;
+}
+
+/* Unlocked */
+.ach-card.unlocked {
+    background: rgba(255, 94, 0, 0.07);
+    border-color: rgba(255, 94, 0, 0.3);
+}
+
+.ach-card.unlocked::before {
+    background: linear-gradient(135deg, rgba(255, 94, 0, 0.05), transparent);
+    opacity: 1;
+}
+
+.ach-card.unlocked:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 94, 0, 0.5);
+    box-shadow: 0 6px 20px rgba(255, 94, 0, 0.15);
+}
+
+/* Locked */
+.ach-card.locked {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.07);
+    opacity: 0.75;
+}
+
+.ach-card.locked:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* Icon */
+.ach-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    flex-shrink: 0;
+    filter: none;
+    transition: filter 0.2s ease;
+}
+
+.ach-card.locked .ach-icon {
+    filter: grayscale(1) opacity(0.4);
+}
+
+/* Body */
+.ach-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.ach-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.ach-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ach-card.locked .ach-title {
+    color: var(--text-secondary);
+}
+
+.ach-badge {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ach-desc {
+    margin: 0 0 8px 0;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* Progress bar (locked only) */
+.ach-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ach-progress-bar {
+    flex: 1;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.ach-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00bcd4, #00e676);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.ach-progress-text {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .achievements-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .achievements-overall-bar {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ach-filter-btn {
+        font-size: 0.75rem;
+        padding: 5px 10px;
+    }
+}

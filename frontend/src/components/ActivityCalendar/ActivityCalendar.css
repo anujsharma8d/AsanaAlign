@@ -1,0 +1,218 @@
+.activity-calendar {
+    padding: 0;
+    width: 100%;
+}
+
+.calendar-header {
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.calendar-header h3 {
+    margin: 0 0 1px 0;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.calendar-subtitle {
+    margin: 0;
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 4px;
+}
+
+.weekday {
+    text-align: center;
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding: 2px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 8px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    font-size: 0.65rem;
+}
+
+.calendar-day.empty {
+    visibility: hidden;
+}
+
+.calendar-day .day-number {
+    font-weight: 500;
+    z-index: 1;
+}
+
+.calendar-day .activity-indicator {
+    position: absolute;
+    bottom: 0px;
+    font-size: 0.8rem;
+    line-height: 1;
+}
+
+/* Activity levels */
+.calendar-day.activity-none {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+}
+
+.calendar-day.activity-low {
+    background: rgba(0, 230, 118, 0.2);
+    border-color: rgba(0, 230, 118, 0.3);
+    color: #00e676;
+}
+
+.calendar-day.activity-low .activity-indicator {
+    color: #00e676;
+}
+
+.calendar-day.activity-medium {
+    background: rgba(255, 158, 0, 0.25);
+    border-color: rgba(255, 158, 0, 0.4);
+    color: #ff9e00;
+}
+
+.calendar-day.activity-medium .activity-indicator {
+    color: #ff9e00;
+}
+
+.calendar-day.activity-high {
+    background: rgba(255, 94, 0, 0.3);
+    border-color: rgba(255, 94, 0, 0.5);
+    color: #ff5e00;
+    font-weight: 600;
+}
+
+.calendar-day.activity-high .activity-indicator {
+    color: #ff5e00;
+}
+
+/* Today highlight */
+.calendar-day.today {
+    border: 2px solid var(--accent-primary);
+    box-shadow: 0 0 12px rgba(255, 94, 0, 0.4);
+}
+
+.calendar-day.today .day-number {
+    font-weight: 700;
+}
+
+/* Hover effects */
+.calendar-day:not(.empty):hover {
+    transform: scale(1.1);
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.calendar-day.activity-none:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.calendar-day.activity-low:hover {
+    background: rgba(0, 230, 118, 0.3);
+}
+
+.calendar-day.activity-medium:hover {
+    background: rgba(255, 158, 0, 0.35);
+}
+
+.calendar-day.activity-high:hover {
+    background: rgba(255, 94, 0, 0.4);
+}
+
+/* Legend */
+.calendar-legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding-top: 8px;
+    border-top: 1px solid var(--glass-border);
+}
+
+.legend-label {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+}
+
+.legend-item {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-item.activity-none {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.legend-item.activity-low {
+    background: rgba(0, 230, 118, 0.2);
+    border-color: rgba(0, 230, 118, 0.3);
+}
+
+.legend-item.activity-medium {
+    background: rgba(255, 158, 0, 0.25);
+    border-color: rgba(255, 158, 0, 0.4);
+}
+
+.legend-item.activity-high {
+    background: rgba(255, 94, 0, 0.3);
+    border-color: rgba(255, 94, 0, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .activity-calendar {
+        max-width: 100%;
+        min-width: auto;
+    }
+
+    .calendar-day {
+        font-size: 0.6rem;
+    }
+
+    .calendar-day .activity-indicator {
+        font-size: 0.75rem;
+    }
+
+    .calendar-header h3 {
+        font-size: 0.9rem;
+    }
+
+    .weekday {
+        font-size: 0.55rem;
+    }
+
+    .legend-label {
+        font-size: 0.55rem;
+    }
+
+    .legend-item {
+        width: 10px;
+        height: 10px;
+    }
+}

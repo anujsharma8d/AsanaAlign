@@ -60,6 +60,17 @@
     border-color: rgba(244, 67, 54, 0.3);
 }
 
+.achievements-btn {
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.08);
+    border-color: rgba(255, 215, 0, 0.25);
+}
+
+.achievements-btn:hover {
+    background: rgba(255, 215, 0, 0.15);
+    border-color: rgba(255, 215, 0, 0.4);
+}
+
 .logo-container {
     display: flex;
     align-items: center;
