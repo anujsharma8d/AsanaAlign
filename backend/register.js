@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
       name,
       passwordHash: bcrypt.hashSync(password, 10),
       createdAt: new Date().toISOString(),
-      emailVerified: false
+      emailVerified: true
     };
 
     await db.collection('users').insertOne(user);

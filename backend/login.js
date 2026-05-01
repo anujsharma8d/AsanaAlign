@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
 
     if (!passwordOk) return sendError(res, 'Email or password is incorrect.', 401);
 
-    // Migrate legacy user to bcrypt + mark verified
+    // Migrate legacy user to bcrypt
     if (needsMigration) {
       await db.collection('users').updateOne(
         { email },
@@ -52,10 +52,6 @@ module.exports = async (req, res) => {
         }
       );
     }
-
-    // Accept both Python True (boolean) and JS true, and missing field for legacy users
-    const verified = user.emailVerified === true || user.emailVerified === 'True' || needsMigration;
-    if (!verified) return sendError(res, 'Email is not verified yet. Please complete signup.', 403);
 
     const stats = await computeStats(db, email);
     return sendJson(res, { user: { ...cleanUser(user), stats } });
