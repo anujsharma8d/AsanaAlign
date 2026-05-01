@@ -10,20 +10,10 @@ services:
         value: production
       - key: MONGO_URI
         sync: false
-      - key: MAIL_USERNAME
-        sync: false
-      - key: MAIL_PASSWORD
+      - key: RESEND_API_KEY
         sync: false
       - key: MAIL_DEFAULT_SENDER
         sync: false
-      - key: MAIL_SERVER
-        value: smtp.gmail.com
-      - key: MAIL_PORT
-        value: "587"
-      - key: MAIL_USE_SSL
-        value: "false"
-      - key: MAIL_USE_TLS
-        value: "true"
       - key: OTP_EXPIRY_MINUTES
         value: "10"
       - key: DEV_MODE

@@ -1,61 +1,46 @@
 const path = require('path');
-const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
 
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 
 const DEV_MODE = String(process.env.DEV_MODE || 'false').toLowerCase() === 'true';
-const EMAIL_ENABLED = Boolean(process.env.MAIL_USERNAME && process.env.MAIL_PASSWORD && process.env.MAIL_DEFAULT_SENDER && !DEV_MODE);
-
-let transporter;
-function getTransporter() {
-  if (!EMAIL_ENABLED) {
-    return null;
-  }
-
-  if (transporter) {
-    return transporter;
-  }
-
-  const port = Number(process.env.MAIL_PORT || 587);
-  const useTLS = String(process.env.MAIL_USE_TLS || 'true').toLowerCase() === 'true';
-  
-  transporter = nodemailer.createTransport({
-    host: process.env.MAIL_SERVER || 'smtp.gmail.com',
-    port: port,
-    secure: port === 465, // true for 465, false for other ports
-    auth: {
-      user: process.env.MAIL_USERNAME,
-      pass: process.env.MAIL_PASSWORD
-    },
-    tls: {
-      rejectUnauthorized: false
-    },
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 10000,
-    socketTimeout: 10000
-  });
-
-  return transporter;
-}
+const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
+const EMAIL_FROM = process.env.MAIL_DEFAULT_SENDER || 'onboarding@resend.dev';
+const EMAIL_ENABLED = Boolean(RESEND_API_KEY && !DEV_MODE);
 
 async function sendEmail(to, subject, text) {
-  const transport = getTransporter();
-  if (!transport) {
+  if (!EMAIL_ENABLED) {
+    console.log('[MAILER] Email disabled (DEV_MODE or missing RESEND_API_KEY). OTP not sent.');
     return false;
   }
 
   try {
-    await transport.sendMail({
-      from: process.env.MAIL_DEFAULT_SENDER,
-      to,
-      subject,
-      text
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: EMAIL_FROM,
+        to: [to],
+        subject,
+        text,
+      }),
     });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.warn(`[MAILER] Resend error sending to ${to}:`, data);
+      return false;
+    }
+
+    console.log(`[MAILER] Email sent to ${to} (id: ${data.id})`);
     return true;
   } catch (error) {
-    console.warn('Unable to send email:', error);
+    console.warn('[MAILER] Failed to send email:', error.message);
     return false;
   }
 }
