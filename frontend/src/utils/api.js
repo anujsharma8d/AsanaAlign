@@ -57,42 +57,6 @@ class API {
     }
   }
 
-  // ==================== OTP / Signup API ====================
-
-  // Send OTP to email for signup verification
-  async sendOtp(email, password, name) {
-    try {
-      const response = await fetch(`${this.baseURL}/api/send-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to send OTP');
-      return data;
-    } catch (error) {
-      console.error('Send OTP error:', error);
-      throw error;
-    }
-  }
-
-  // Verify OTP and create account
-  async verifyOtp(email, otp) {
-    try {
-      const response = await fetch(`${this.baseURL}/api/verify-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'OTP verification failed');
-      return data;
-    } catch (error) {
-      console.error('Verify OTP error:', error);
-      throw error;
-    }
-  }
-
   // ==================== Profile API ====================
 
   // Get user profile

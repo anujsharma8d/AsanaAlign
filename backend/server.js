@@ -33,8 +33,6 @@ function use(handler) {
 app.get('/health',                use(require('./health')));
 app.post('/api/register',         use(require('./register')));
 app.post('/api/login',            use(require('./login')));
-app.post('/api/send-otp',         use(require('./send-otp')));
-app.post('/api/verify-otp',       use(require('./verify-otp')));
 app.post('/api/sessions',         use(require('./sessions')));
 app.get('/api/progress',          use(require('./progress')));
 app.get('/api/reports',           use(require('./reports')));
