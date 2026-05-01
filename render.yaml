@@ -19,13 +19,15 @@ services:
       - key: MAIL_SERVER
         value: smtp.gmail.com
       - key: MAIL_PORT
-        value: "465"
+        value: "587"
       - key: MAIL_USE_SSL
-        value: "true"
-      - key: MAIL_USE_TLS
         value: "false"
+      - key: MAIL_USE_TLS
+        value: "true"
       - key: OTP_EXPIRY_MINUTES
         value: "10"
+      - key: DEV_MODE
+        value: "false"
 
   - type: web
     name: asana-align-frontend
