@@ -18,14 +18,23 @@ function getTransporter() {
     return transporter;
   }
 
+  const port = Number(process.env.MAIL_PORT || 587);
+  const useTLS = String(process.env.MAIL_USE_TLS || 'true').toLowerCase() === 'true';
+  
   transporter = nodemailer.createTransport({
     host: process.env.MAIL_SERVER || 'smtp.gmail.com',
-    port: Number(process.env.MAIL_PORT || 465),
-    secure: String(process.env.MAIL_USE_SSL || 'true').toLowerCase() === 'true',
+    port: port,
+    secure: port === 465, // true for 465, false for other ports
     auth: {
       user: process.env.MAIL_USERNAME,
       pass: process.env.MAIL_PASSWORD
-    }
+    },
+    tls: {
+      rejectUnauthorized: false
+    },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 10000
   });
 
   return transporter;
