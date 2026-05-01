@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: asana-align-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_DEFAULT_SENDER
+        sync: false
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USE_SSL
+        value: "false"
+      - key: MAIL_USE_TLS
+        value: "true"
+      - key: OTP_EXPIRY_MINUTES
+        value: "10"
+      - key: DEV_MODE
+        value: "false"
+
+  - type: web
+    name: asana-align-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://yoga-intelligence.onrender.com
