@@ -301,6 +301,3 @@ This project is open-source. You can add a license file to define usage permissi
 ## ⭐ Support
 
 If you like this project, consider giving it a star ⭐ on GitHub.
-
-```
-```
